@@ -11,8 +11,41 @@ import SceneKit
 import MapKit
 import ARCL
 
+extension UIImage {
+    
+    /// Returns a image that fills in newSize
+    func resizedImage(newSize: CGSize) -> UIImage {
+        // Guard newSize is different
+        guard self.size != newSize else { return self }
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0);
+        self.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
+        let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return newImage
+    }
+    
+    /// Returns a resized image that fits in rectSize, keeping it's aspect ratio
+    /// Note that the new image size is not rectSize, but within it.
+    func resizedImageWithinRect(rectSize: CGSize) -> UIImage {
+        let widthFactor = size.width / rectSize.width
+        let heightFactor = size.height / rectSize.height
+        
+        var resizeFactor = widthFactor
+        if size.height > size.width {
+            resizeFactor = heightFactor
+        }
+        
+        let newSize = CGSize(width: size.width/resizeFactor, height: size.height/resizeFactor)
+        let resized = resizedImage(newSize: newSize)
+        return resized
+    }
+    
+}
+
 @available(iOS 11.0, *)
 class ViewController: UIViewController {
+    
     let sceneLocationView = SceneLocationView()
 
     let mapView = MKMapView()
@@ -34,10 +67,82 @@ class ViewController: UIViewController {
 
     var infoLabel = UILabel()
 
+    var positionLabel = UILabel()
+    
+    var globalPositionLat: Double?
+    
+    var globalPositionLon: Double?
+    
     var updateInfoLabelTimer: Timer?
 
     var adjustNorthByTappingSidesOfScreen = false
+    
+    var itemsGlobal: [ItemStruct?] = []
 
+    struct FirstLevel: Codable
+    {
+        var result: ResultStruct?
+    }
+    
+    struct ResultStruct: Codable
+    {
+        var items: [ItemStruct?]
+    }
+    
+    struct ItemStruct: Codable
+    {
+        var id: Int?
+        var rooms: Int?
+        var area: Float?
+        var floor: Int?
+        var floors: Int?
+        var price: Float64?
+        var location: LocationStruct?
+        var photo: [String?]
+    }
+    
+    struct LocationStruct: Codable
+    {
+        var lon: Double?
+        var lat: Double?
+    }
+    
+    func StartLoad()
+    {
+
+        let pos = sceneLocationView.currentLocation()
+        let corLat: Double = (pos?.coordinate.latitude)!
+        let corLon: Double = (pos?.coordinate.longitude)!
+        let positionLat: String = String(format:"%f", corLat)
+        let positionLon: String = String(format:"%f", corLon)
+        let finally:String = "Position - " + positionLat + " x " + positionLon
+
+        
+        //let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius=500&aggregate_by=with_photo"
+        let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.773631,37.605580&nearby_radius=250&aggregate_by=with_photo"
+        
+        print("URL - "+urlString)
+        
+        guard let url = URL(string: urlString) else {return}
+        
+        URLSession.shared.dataTask(with: url) { (data, respone, error) in
+            guard let data = data else {return}
+            guard error == nil else {return}
+            
+            do
+            {
+                let flatsW = try JSONDecoder().decode(FirstLevel.self, from: data)
+                self.itemsGlobal = (flatsW.result?.items)!
+                self.buildDemoData().forEach { self.sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
+            }
+            catch let error
+            {
+                print(error)
+            }
+            
+            }.resume()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,7 +151,13 @@ class ViewController: UIViewController {
         infoLabel.textColor = UIColor.white
         infoLabel.numberOfLines = 0
         sceneLocationView.addSubview(infoLabel)
-
+        
+        positionLabel.font = UIFont.systemFont(ofSize: 10)
+        positionLabel.textAlignment = .left
+        positionLabel.textColor = UIColor.white
+        positionLabel.numberOfLines = 0
+        sceneLocationView.addSubview(positionLabel)
+        
         updateInfoLabelTimer = Timer.scheduledTimer(
             timeInterval: 0.1,
             target: self,
@@ -65,9 +176,14 @@ class ViewController: UIViewController {
         if displayDebugging {
             sceneLocationView.showFeaturePoints = true
         }
-
-        buildDemoData().forEach { sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
-
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute:
+        {
+            self.StartLoad()
+        })
+        
+        //buildDemoData().forEach { sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
+        
         view.addSubview(sceneLocationView)
 
         if showMapView {
@@ -83,12 +199,15 @@ class ViewController: UIViewController {
                 userInfo: nil,
                 repeats: true)
         }
+        
     }
 
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool)
+    {
         super.viewWillAppear(animated)
         print("run")
         sceneLocationView.run()
+        //StartLoad()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -105,7 +224,9 @@ class ViewController: UIViewController {
         sceneLocationView.frame = view.bounds
 
         infoLabel.frame = CGRect(x: 6, y: 0, width: self.view.frame.size.width - 12, height: 14 * 4)
-
+        
+        positionLabel.frame = CGRect(x:6, y: 10, width: self.view.frame.size.width - 12, height: 14 * 4)
+        
         if showMapView {
             infoLabel.frame.origin.y = (self.view.frame.size.height / 2) - infoLabel.frame.size.height
         } else {
@@ -177,6 +298,19 @@ class ViewController: UIViewController {
     }
 
     @objc func updateInfoLabel() {
+        
+        if sceneLocationView.currentLocation() != nil
+        {
+            let pos = sceneLocationView.currentLocation()
+            let corLat: Double = (pos?.coordinate.latitude)!
+            let corLon: Double = (pos?.coordinate.longitude)!
+            let positionLat: String = String(format:"%f", corLat)
+            let positionLon: String = String(format:"%f", corLon)
+            let finally:String = "Position - " + positionLat + " x " + positionLon
+            
+            positionLabel.text = finally
+        }
+        
         if let position = sceneLocationView.currentScenePosition() {
             infoLabel.text = "x: \(String(format: "%.2f", position.x)), y: \(String(format: "%.2f", position.y)), z: \(String(format: "%.2f", position.z))\n"
         }
@@ -187,6 +321,7 @@ class ViewController: UIViewController {
 
         if let heading = sceneLocationView.locationManager.heading,
             let accuracy = sceneLocationView.locationManager.headingAccuracy {
+            
             infoLabel.text!.append("Heading: \(heading)º, accuracy: \(Int(round(accuracy)))º\n")
         }
 
@@ -282,27 +417,87 @@ extension ViewController: SceneLocationViewDelegate {
 @available(iOS 11.0, *)
 private extension ViewController {
     func buildDemoData() -> [LocationAnnotationNode] {
+        
         var nodes: [LocationAnnotationNode] = []
-
+        
+        print("Json Count - ",itemsGlobal.count)
+        
+        
+        for i in 0..<itemsGlobal.count
+        {
+            //print("lat - ",itemsGlobal[i]?.location?.lat!," lon - ",itemsGlobal[i]?.location?.lon!)
+            let latitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lat)!
+            let longitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lon)!
+            let imageNameFromWeb: String = (itemsGlobal[i]?.photo[0])!
+            let imageNameConst: String = "https://img09.domclick.ru/s1280x-q80"
+            let imageNameLocal:String = imageNameConst+imageNameFromWeb
+            let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal)
+            nodes.append(target)
+        }
+ 
         // TODO: add a few more demo points of interest.
         // TODO: use more varied imagery.
-
-        let spaceNeedle = buildNode(latitude: 47.6205, longitude: -122.3493, altitude: 225, imageName: "pin")
-        nodes.append(spaceNeedle)
-
-        let empireStateBuilding = buildNode(latitude: 40.7484, longitude: -73.9857, altitude: 14.3, imageName: "pin")
-        nodes.append(empireStateBuilding)
-
-        let canaryWharf = buildNode(latitude: 51.504607, longitude: -0.019592, altitude: 236, imageName: "pin")
-        nodes.append(canaryWharf)
-
+        
+        /*
+        let bc = buildNode(latitude: 55.739118, longitude: 37.539473, altitude: 165, imageName: "bc")
+        nodes.append(bc)
+        
+        let ostnkino = buildNode(latitude: 55.741287, longitude: 37.540156, altitude: 165, imageName: "ostankino")
+        nodes.append(ostnkino)
+        
+        let zdravo = buildNode(latitude: 55.738191, longitude: 37.528981, altitude: 165, imageName: "zdravo")
+        nodes.append(zdravo)
+        
+        let rosbank = buildNode(latitude: 55.736812, longitude: 37.531693, altitude: 165, imageName: "rosbank")
+        nodes.append(rosbank)
+        
+        let poliklinika = buildNode(latitude: 55.740639, longitude: 37.538269, altitude: 165, imageName: "poliklinika")
+        nodes.append(poliklinika)
+        
+        let kofe = buildNode(latitude: 55.738688, longitude: 37.531029, altitude: 165, imageName: "kofe")
+        nodes.append(kofe)
+        
+        let photo = buildNode(latitude: 55.739823, longitude: 37.538512, altitude: 165, imageName: "photo")
+        nodes.append(photo)
+        
+        let pochta = buildNode(latitude: 55.736382, longitude: 37.530211, altitude: 165, imageName: "pochta")
+        nodes.append(pochta)
+        
+        let magefon = buildNode(latitude: 55.738688, longitude: 37.531029, altitude: 165, imageName: "megafon")
+        nodes.append(magefon)
+        
+        let bc2 = buildNode(latitude: 55.741287, longitude: 37.536868, altitude: 165, imageName: "bc")
+        nodes.append(bc2)
+        
+        let ostnkino2 = buildNode(latitude: 55.741287, longitude: 37.536868, altitude: 165, imageName: "ostankino")
+        nodes.append(ostnkino2)
+        */
+        
+        /*
+        for i in 0..<nodes.count
+        {
+            print(nodes[i].location)
+        }
+         */
+        
+        print("Nods Count - ",nodes.count)
+        
         return nodes
     }
 
     func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String) -> LocationAnnotationNode {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let location = CLLocation(coordinate: coordinate, altitude: altitude)
-        let image = UIImage(named: imageName)!
+        var image = UIImage(named: "bc")!
+        
+        if let urlImage = NSURL(string: imageName)
+        {
+            if let data = NSData(contentsOf: urlImage as URL)
+            {
+                image = UIImage(data: data as Data, scale: 1)!
+                image = image.resizedImage(newSize: CGSize(width: 100, height: 100))
+            }
+        }
         return LocationAnnotationNode(location: location, image: image)
     }
 }

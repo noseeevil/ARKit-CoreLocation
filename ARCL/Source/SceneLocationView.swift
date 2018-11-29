@@ -456,6 +456,10 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
         SCNTransaction.commit()
 
         locationDelegate?.sceneLocationViewDidUpdateLocationAndScaleOfLocationNode(sceneLocationView: self, locationNode: locationNode)
+        var x: String = String(format:"%f", locationNode.position.x)
+        var y: String = String(format:"%f", locationNode.position.y)
+        var z: String = String(format:"%f", locationNode.position.z)
+        print("LocationNodePosition - "+x+" "+y+" "+z)
     }
 
     // MARK: - ARSCNViewDelegate
