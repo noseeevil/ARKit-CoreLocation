@@ -11,37 +11,7 @@ import SceneKit
 import MapKit
 import ARCL
 
-extension UIImage {
-    
-    /// Returns a image that fills in newSize
-    func resizedImage(newSize: CGSize) -> UIImage {
-        // Guard newSize is different
-        guard self.size != newSize else { return self }
-        
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0);
-        self.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
-        let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return newImage
-    }
-    
-    /// Returns a resized image that fits in rectSize, keeping it's aspect ratio
-    /// Note that the new image size is not rectSize, but within it.
-    func resizedImageWithinRect(rectSize: CGSize) -> UIImage {
-        let widthFactor = size.width / rectSize.width
-        let heightFactor = size.height / rectSize.height
-        
-        var resizeFactor = widthFactor
-        if size.height > size.width {
-            resizeFactor = heightFactor
-        }
-        
-        let newSize = CGSize(width: size.width/resizeFactor, height: size.height/resizeFactor)
-        let resized = resizedImage(newSize: newSize)
-        return resized
-    }
-    
-}
+
 
 @available(iOS 11.0, *)
 class ViewController: UIViewController {
@@ -69,6 +39,8 @@ class ViewController: UIViewController {
 
     var positionLabel = UILabel()
     
+    var radiusInput = UISearchBar()
+    
     var globalPositionLat: Double?
     
     var globalPositionLon: Double?
@@ -78,70 +50,7 @@ class ViewController: UIViewController {
     var adjustNorthByTappingSidesOfScreen = false
     
     var itemsGlobal: [ItemStruct?] = []
-
-    struct FirstLevel: Codable
-    {
-        var result: ResultStruct?
-    }
     
-    struct ResultStruct: Codable
-    {
-        var items: [ItemStruct?]
-    }
-    
-    struct ItemStruct: Codable
-    {
-        var id: Int?
-        var rooms: Int?
-        var area: Float?
-        var floor: Int?
-        var floors: Int?
-        var price: Float64?
-        var location: LocationStruct?
-        var photo: [String?]
-    }
-    
-    struct LocationStruct: Codable
-    {
-        var lon: Double?
-        var lat: Double?
-    }
-    
-    func StartLoad()
-    {
-
-        let pos = sceneLocationView.currentLocation()
-        let corLat: Double = (pos?.coordinate.latitude)!
-        let corLon: Double = (pos?.coordinate.longitude)!
-        let positionLat: String = String(format:"%f", corLat)
-        let positionLon: String = String(format:"%f", corLon)
-        let finally:String = "Position - " + positionLat + " x " + positionLon
-
-        
-        //let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius=500&aggregate_by=with_photo"
-        let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.773631,37.605580&nearby_radius=250&aggregate_by=with_photo"
-        
-        print("URL - "+urlString)
-        
-        guard let url = URL(string: urlString) else {return}
-        
-        URLSession.shared.dataTask(with: url) { (data, respone, error) in
-            guard let data = data else {return}
-            guard error == nil else {return}
-            
-            do
-            {
-                let flatsW = try JSONDecoder().decode(FirstLevel.self, from: data)
-                self.itemsGlobal = (flatsW.result?.items)!
-                self.buildDemoData().forEach { self.sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
-            }
-            catch let error
-            {
-                print(error)
-            }
-            
-            }.resume()
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -157,6 +66,9 @@ class ViewController: UIViewController {
         positionLabel.textColor = UIColor.white
         positionLabel.numberOfLines = 0
         sceneLocationView.addSubview(positionLabel)
+        
+        radiusInput.delegate = self
+        sceneLocationView.addSubview(radiusInput)
         
         updateInfoLabelTimer = Timer.scheduledTimer(
             timeInterval: 0.1,
@@ -179,7 +91,7 @@ class ViewController: UIViewController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute:
         {
-            self.StartLoad()
+            //self.StartLoad()
         })
         
         //buildDemoData().forEach { sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
@@ -201,13 +113,15 @@ class ViewController: UIViewController {
         }
         
     }
-
+ 
+ 
+    //***************************
+    
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
         print("run")
         sceneLocationView.run()
-        //StartLoad()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -226,6 +140,8 @@ class ViewController: UIViewController {
         infoLabel.frame = CGRect(x: 6, y: 0, width: self.view.frame.size.width - 12, height: 14 * 4)
         
         positionLabel.frame = CGRect(x:6, y: 10, width: self.view.frame.size.width - 12, height: 14 * 4)
+        
+        radiusInput.frame = CGRect(x:6, y: 50, width: self.view.frame.size.width - 12, height: 14 * 4)
         
         if showMapView {
             infoLabel.frame.origin.y = (self.view.frame.size.height / 2) - infoLabel.frame.size.height
@@ -252,23 +168,18 @@ class ViewController: UIViewController {
                 print("Fetch current location")
                 print("best location estimate, position: \(bestEstimate.position), location: \(bestEstimate.location.coordinate), accuracy: \(bestEstimate.location.horizontalAccuracy), date: \(bestEstimate.location.timestamp)")
                 print("current position: \(position)")
-
                 let translation = bestEstimate.translatedLocation(to: position)
-
                 print("translation: \(translation)")
                 print("translated location: \(currentLocation)")
                 print("")
             }
-
             if self.userAnnotation == nil {
                 self.userAnnotation = MKPointAnnotation()
                 self.mapView.addAnnotation(self.userAnnotation!)
             }
-
             UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
                 self.userAnnotation?.coordinate = currentLocation.coordinate
             }, completion: nil)
-
             if self.centerMapOnUserLocation {
                 UIView.animate(withDuration: 0.45, delay: 0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
                     self.mapView.setCenter(self.userAnnotation!.coordinate, animated: false)
@@ -276,7 +187,6 @@ class ViewController: UIViewController {
                     self.mapView.region.span = MKCoordinateSpan(latitudeDelta: 0.0005, longitudeDelta: 0.0005)
                 })
             }
-
             if self.displayDebugging {
                 let bestLocationEstimate = self.sceneLocationView.bestLocationEstimate()
 
@@ -285,7 +195,6 @@ class ViewController: UIViewController {
                         self.locationEstimateAnnotation = MKPointAnnotation()
                         self.mapView.addAnnotation(self.locationEstimateAnnotation!)
                     }
-
                     self.locationEstimateAnnotation!.coordinate = bestLocationEstimate!.location.coordinate
                 } else {
                     if self.locationEstimateAnnotation != nil {
@@ -364,6 +273,18 @@ class ViewController: UIViewController {
     }
 }
 
+@available(iOS 11.0, *)
+extension ViewController: UISearchBarDelegate{
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar)
+    {
+        print("This is - "+searchBar.text!)
+        self.radiusInput.endEditing(true)
+        self.StartLoad(radius: searchBar.text!)
+    }
+    
+}
+
 // MARK: - MKMapViewDelegate
 @available(iOS 11.0, *)
 extension ViewController: MKMapViewDelegate {
@@ -394,11 +315,11 @@ extension ViewController: MKMapViewDelegate {
 @available(iOS 11.0, *)
 extension ViewController: SceneLocationViewDelegate {
     func sceneLocationViewDidAddSceneLocationEstimate(sceneLocationView: SceneLocationView, position: SCNVector3, location: CLLocation) {
-        print("add scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
+        //print("add scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
     }
 
     func sceneLocationViewDidRemoveSceneLocationEstimate(sceneLocationView: SceneLocationView, position: SCNVector3, location: CLLocation) {
-        print("remove scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
+        //print("remove scene location estimate, position: \(position), location: \(location.coordinate), accuracy: \(location.horizontalAccuracy), date: \(location.timestamp)")
     }
 
     func sceneLocationViewDidConfirmLocationOfNode(sceneLocationView: SceneLocationView, node: LocationNode) {
@@ -434,6 +355,8 @@ private extension ViewController {
             let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal)
             nodes.append(target)
         }
+ 
+        
  
         // TODO: add a few more demo points of interest.
         // TODO: use more varied imagery.
@@ -479,6 +402,12 @@ private extension ViewController {
             print(nodes[i].location)
         }
          */
+        /*
+        for i in 0..<nodes.count
+        {
+            nodes[i].scaleRelativeToDistance = true
+        }
+        */
         
         print("Nods Count - ",nodes.count)
         
@@ -498,8 +427,43 @@ private extension ViewController {
                 image = image.resizedImage(newSize: CGSize(width: 100, height: 100))
             }
         }
+        
         return LocationAnnotationNode(location: location, image: image)
     }
+    
+    func StartLoad(radius: String)
+    {
+        let pos = sceneLocationView.currentLocation()
+        let corLat: Double = (pos?.coordinate.latitude)!
+        let corLon: Double = (pos?.coordinate.longitude)!
+        let positionLat: String = String(format:"%f", corLat)
+        let positionLon: String = String(format:"%f", corLon)
+        let finally:String = "Position - " + positionLat + " x " + positionLon
+        
+        //let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius=500&aggregate_by=with_photo"
+        let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.7436,37.7671&nearby_radius="+radius+"&aggregate_by=with_photo"
+        
+        print("URL - "+urlString)
+        
+        guard let url = URL(string: urlString) else {return}
+        
+        URLSession.shared.dataTask(with: url) { (data, respone, error) in
+            guard let data = data else {return}
+            guard error == nil else {return}
+            do
+            {
+                let flatsW = try JSONDecoder().decode(FirstLevel.self, from: data)
+                self.itemsGlobal = (flatsW.result?.items)!
+                self.buildDemoData().forEach { self.sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
+            }
+            catch let error
+            {
+                print(error)
+            }
+            
+            }.resume()
+    }
+    
 }
 
 extension DispatchQueue {

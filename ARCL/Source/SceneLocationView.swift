@@ -378,13 +378,15 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
             let currentLocation = currentLocation() else {
             return
         }
-
+        
         SCNTransaction.begin()
 
         SCNTransaction.animationDuration = animated ? duration : 0
 
         let locationNodeLocation = locationOfLocationNode(locationNode)
 
+        //print(locationNodeLocation)
+        
         // Position is set to a position coordinated via the current position
         let locationTranslation = currentLocation.translation(toLocation: locationNodeLocation)
         let adjustedDistance: CLLocationDistance
@@ -456,10 +458,10 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
         SCNTransaction.commit()
 
         locationDelegate?.sceneLocationViewDidUpdateLocationAndScaleOfLocationNode(sceneLocationView: self, locationNode: locationNode)
-        var x: String = String(format:"%f", locationNode.position.x)
-        var y: String = String(format:"%f", locationNode.position.y)
-        var z: String = String(format:"%f", locationNode.position.z)
-        print("LocationNodePosition - "+x+" "+y+" "+z)
+        //var x: String = String(format:"%f", locationNode.position.x)
+        //var y: String = String(format:"%f", locationNode.position.y)
+        //var z: String = String(format:"%f", locationNode.position.z)
+        //print("LocationNodePosition - "+x+" "+y+" "+z)
     }
 
     // MARK: - ARSCNViewDelegate

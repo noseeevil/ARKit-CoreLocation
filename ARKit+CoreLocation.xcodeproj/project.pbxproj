@@ -26,6 +26,9 @@
 		932EF26820BE83A80052210C /* FloatingPoint+Radians.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A3FC021F09BADB00AA59C8 /* FloatingPoint+Radians.swift */; };
 		932EF26920BE83A80052210C /* CGPoint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A3FC041F0A423800AA59C8 /* CGPoint+Extensions.swift */; };
 		932EF26A20BE83A80052210C /* SCNNode+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D206F21F124BDD00D7D622 /* SCNNode+Extensions.swift */; };
+		C0E7041921B6C265000F3156 /* DelegateExtends.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E7041821B6C265000F3156 /* DelegateExtends.swift */; };
+		C0F193EC21AFEF2A00AB4A25 /* ResizeUIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F193EB21AFEF2A00AB4A25 /* ResizeUIImage.swift */; };
+		C0F193EE21AFF24700AB4A25 /* JSONStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F193ED21AFF24700AB4A25 /* JSONStruct.swift */; };
 		D8C205D11F5B197200675E6E /* NotSupportedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8C205D01F5B197200675E6E /* NotSupportedViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +94,9 @@
 		932EF22A20BE7E6E0052210C /* ARCLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ARCLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		932EF23120BE7E6E0052210C /* ARCLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARCLTests.swift; sourceTree = "<group>"; };
 		932EF23320BE7E6E0052210C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C0E7041821B6C265000F3156 /* DelegateExtends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DelegateExtends.swift; sourceTree = "<group>"; };
+		C0F193EB21AFEF2A00AB4A25 /* ResizeUIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizeUIImage.swift; sourceTree = "<group>"; };
+		C0F193ED21AFF24700AB4A25 /* JSONStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONStruct.swift; sourceTree = "<group>"; };
 		D8C205D01F5B197200675E6E /* NotSupportedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotSupportedViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -145,6 +151,7 @@
 		49A3FBDA1F09988100AA59C8 /* ARKit+CoreLocation */ = {
 			isa = PBXGroup;
 			children = (
+				C0F193EA21AFEEF800AB4A25 /* noseeevil */,
 				49A3FBDB1F09988100AA59C8 /* AppDelegate.swift */,
 				49A3FBDF1F09988100AA59C8 /* ViewController.swift */,
 				D8C205D01F5B197200675E6E /* NotSupportedViewController.swift */,
@@ -189,6 +196,16 @@
 				932EF23320BE7E6E0052210C /* Info.plist */,
 			);
 			path = ARCLTests;
+			sourceTree = "<group>";
+		};
+		C0F193EA21AFEEF800AB4A25 /* noseeevil */ = {
+			isa = PBXGroup;
+			children = (
+				C0F193ED21AFF24700AB4A25 /* JSONStruct.swift */,
+				C0F193EB21AFEF2A00AB4A25 /* ResizeUIImage.swift */,
+				C0E7041821B6C265000F3156 /* DelegateExtends.swift */,
+			);
+			path = noseeevil;
 			sourceTree = "<group>";
 		};
 		F2E2E005FD78BDD52B0F8A94 /* Frameworks */ = {
@@ -363,7 +380,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0F193EE21AFF24700AB4A25 /* JSONStruct.swift in Sources */,
 				D8C205D11F5B197200675E6E /* NotSupportedViewController.swift in Sources */,
+				C0E7041921B6C265000F3156 /* DelegateExtends.swift in Sources */,
+				C0F193EC21AFEF2A00AB4A25 /* ResizeUIImage.swift in Sources */,
 				49A3FBE01F09988100AA59C8 /* ViewController.swift in Sources */,
 				49A3FBDC1F09988100AA59C8 /* AppDelegate.swift in Sources */,
 			);
