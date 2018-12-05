@@ -59,7 +59,7 @@ open class LocationAnnotationNode: LocationNode {
     ///When viewed from a distance, the annotation will be seen at the size provided
     ///e.g. if the size is 100x100px, the annotation will take up approx 100x100 points on screen.
     public let image: UIImage
-
+    
     ///Subnodes and adjustments should be applied to this subnode
     ///Required to allow scaling at the same time as having a 2D 'billboard' appearance
     public let annotationNode: SCNNode

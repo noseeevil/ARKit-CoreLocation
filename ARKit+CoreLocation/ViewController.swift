@@ -287,19 +287,30 @@ private extension ViewController {
         // TODO: add a few more demo points of interest.
         // TODO: use more varied imagery.
 
-        let spaceNeedle = buildNode(latitude: 47.6205, longitude: -122.3493, altitude: 225, imageName: "pin")
+        //55.745205, 37.765318
+        //55.735739, 37.742766
+        //55.744552, 37.813405
+        //55.773631, 37.605580 - work
+        let spaceNeedle = buildNode(latitude: 55.745205, longitude: 37.765318, altitude: 162, imageName: "pin", nodeName: "test1")
+        //spaceNeedle.scaleRelativeToDistance = true
         nodes.append(spaceNeedle)
 
-        let empireStateBuilding = buildNode(latitude: 40.7484, longitude: -73.9857, altitude: 14.3, imageName: "pin")
+        let empireStateBuilding = buildNode(latitude: 55.735739, longitude: 37.742766, altitude: 162, imageName: "pin", nodeName: "test2")
+        //empireStateBuilding.scaleRelativeToDistance = true
         nodes.append(empireStateBuilding)
 
-        let canaryWharf = buildNode(latitude: 51.504607, longitude: -0.019592, altitude: 236, imageName: "pin")
+        let canaryWharf = buildNode(latitude: 55.744552, longitude: 37.813405, altitude: 162, imageName: "pin", nodeName: "test3")
+        //canaryWharf.scaleRelativeToDistance = true
         nodes.append(canaryWharf)
+        
+        let work = buildNode(latitude: 55.773631, longitude: 37.605580, altitude: 162, imageName: "pin", nodeName: "work")
+        work.scaleRelativeToDistance = true
+        nodes.append(work)
 
         return nodes
     }
 
-    func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String) -> LocationAnnotationNode {
+    func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String, nodeName: String) -> LocationAnnotationNode {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let location = CLLocation(coordinate: coordinate, altitude: altitude)
         let image = UIImage(named: imageName)!
