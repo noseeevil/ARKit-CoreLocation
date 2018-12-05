@@ -356,7 +356,12 @@ private extension ViewController {
             nodes.append(target)
         }
  
+        //let first = buildNode(latitude: 54.782635, longitude: 32.045251, altitude: 165, imageName: "poliklinika")
+        //nodes.append(first)
         
+        //let second = buildNode(latitude: 56.041705, longitude: 35.963046, altitude: 165, imageName: "poliklinika")
+        //nodes.append(second)
+        //56.041705, 35.963046
  
         // TODO: add a few more demo points of interest.
         // TODO: use more varied imagery.
@@ -424,7 +429,7 @@ private extension ViewController {
             if let data = NSData(contentsOf: urlImage as URL)
             {
                 image = UIImage(data: data as Data, scale: 1)!
-                image = image.resizedImage(newSize: CGSize(width: 100, height: 100))
+                image = image.resizedImage(newSize: CGSize(width: 200, height: 200))
             }
         }
         
@@ -440,8 +445,8 @@ private extension ViewController {
         let positionLon: String = String(format:"%f", corLon)
         let finally:String = "Position - " + positionLat + " x " + positionLon
         
-        //let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius=500&aggregate_by=with_photo"
-        let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.7436,37.7671&nearby_radius="+radius+"&aggregate_by=with_photo"
+        let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius="+radius+"&aggregate_by=with_photo"
+        //let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.7436,37.7671&nearby_radius="+radius+"&aggregate_by=with_photo"
         
         print("URL - "+urlString)
         

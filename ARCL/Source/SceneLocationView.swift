@@ -392,12 +392,17 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
         let adjustedDistance: CLLocationDistance
         let distance = locationNodeLocation.distance(from: currentLocation)
 
+        //print("Distance -",distance,"MyLat-", currentLocation.coordinate.latitude,"MyLon -", currentLocation.coordinate.longitude,"OtherLat-", locationNodeLocation.coordinate.latitude,"OtherLon-", locationNodeLocation.coordinate.longitude)
+        
         if locationNode.locationConfirmed &&
             (distance > 100 || locationNode.continuallyAdjustNodePositionWhenWithinRange || initialSetup) {
             if distance > 100 {
+                //print("FIRST")
                 //If the item is too far away, bring it closer and scale it down
                 let scale = 100 / Float(distance)
 
+                //print("Scale -", scale)
+                
                 adjustedDistance = distance * Double(scale)
 
                 let adjustedTranslation = SCNVector3(
@@ -413,7 +418,11 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
                 locationNode.position = position
 
                 locationNode.scale = SCNVector3(x: scale, y: scale, z: scale)
+                
+                print("position -",locationNode.position," scale -", locationNode.scale)
+                
             } else {
+                //print("Second")
                 adjustedDistance = distance
                 let position = SCNVector3(
                     x: currentPosition.x + Float(locationTranslation.longitudeTranslation),
@@ -424,6 +433,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
                 locationNode.scale = SCNVector3(x: 1, y: 1, z: 1)
             }
         } else {
+            //print("THIRD")
             //Calculates distance based on the distance within the scene, as the location isn't yet confirmed
             adjustedDistance = Double(currentPosition.distance(to: locationNode.position))
 
