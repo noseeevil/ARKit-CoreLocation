@@ -394,6 +394,8 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
 
         //print("Distance -",distance,"MyLat-", currentLocation.coordinate.latitude,"MyLon -", currentLocation.coordinate.longitude,"OtherLat-", locationNodeLocation.coordinate.latitude,"OtherLon-", locationNodeLocation.coordinate.longitude)
         
+         //print("Dis -", distance)
+        
         if locationNode.locationConfirmed &&
             (distance > 100 || locationNode.continuallyAdjustNodePositionWhenWithinRange || initialSetup) {
             if distance > 100 {
@@ -401,7 +403,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
                 //If the item is too far away, bring it closer and scale it down
                 let scale = 100 / Float(distance)
 
-                //print("Scale -", scale)
+                //print("Dis -", distance)
                 
                 adjustedDistance = distance * Double(scale)
 
@@ -419,7 +421,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
 
                 locationNode.scale = SCNVector3(x: scale, y: scale, z: scale)
                 
-                print("position -",locationNode.position," scale -", locationNode.scale)
+                //print("position -",locationNode.position," scale -", locationNode.scale)
                 
             } else {
                 //print("Second")
@@ -450,7 +452,9 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
 
             if annotationNode.scaleRelativeToDistance {
                 scale = appliedScale.y
-                annotationNode.annotationNode.scale = appliedScale
+                var koef: Float = 1
+                var NewScale = SCNVector3(x: appliedScale.x * koef, y: appliedScale.y * koef, z: appliedScale.z * koef)
+                annotationNode.annotationNode.scale = NewScale
             } else {
                 //Scale it to be an appropriate size so that it can be seen
                 scale = Float(adjustedDistance) * 0.181

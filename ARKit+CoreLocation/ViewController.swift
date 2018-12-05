@@ -353,9 +353,16 @@ private extension ViewController {
             let imageNameConst: String = "https://img09.domclick.ru/s1280x-q80"
             let imageNameLocal:String = imageNameConst+imageNameFromWeb
             let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal)
+            target.scaleRelativeToDistance = true
             nodes.append(target)
         }
  
+        //55.744073, 37.765630
+ 
+        //let first = buildNode(latitude: 55.744073, longitude: 37.765630, altitude: 165, imageName: "pin2")
+        //first.scaleRelativeToDistance = true
+        //nodes.append(first)
+        
         //let first = buildNode(latitude: 54.782635, longitude: 32.045251, altitude: 165, imageName: "poliklinika")
         //nodes.append(first)
         
@@ -422,16 +429,16 @@ private extension ViewController {
     func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String) -> LocationAnnotationNode {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let location = CLLocation(coordinate: coordinate, altitude: altitude)
-        var image = UIImage(named: "bc")!
+        var image = UIImage(named: "pin3")!
         
-        if let urlImage = NSURL(string: imageName)
-        {
-            if let data = NSData(contentsOf: urlImage as URL)
-            {
-                image = UIImage(data: data as Data, scale: 1)!
-                image = image.resizedImage(newSize: CGSize(width: 200, height: 200))
-            }
-        }
+        //if let urlImage = NSURL(string: imageName)
+        //{
+        //    if let data = NSData(contentsOf: urlImage as URL)
+        //    {
+        //        image = UIImage(data: data as Data, scale: 1)!
+        //       image = image.resizedImage(newSize: CGSize(width: 100, height: 100))
+        //   }
+        //}
         
         return LocationAnnotationNode(location: location, image: image)
     }
