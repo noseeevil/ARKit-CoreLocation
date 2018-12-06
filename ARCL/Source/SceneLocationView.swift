@@ -284,7 +284,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
         if locationNode.location == nil || locationNode.locationConfirmed == false {
             return
         }
-
+        
         updatePositionAndScaleOfLocationNode(locationNode: locationNode, initialSetup: true, animated: false)
 
         locationNodes.append(locationNode)
@@ -378,11 +378,11 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
             let currentLocation = currentLocation() else {
             return
         }
-        
+                
         SCNTransaction.begin()
 
         SCNTransaction.animationDuration = animated ? duration : 0
-
+        
         let locationNodeLocation = locationOfLocationNode(locationNode)
 
         //print(locationNodeLocation)

@@ -242,7 +242,32 @@ class ViewController: UIViewController {
         }
     }
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
+    {
+        
+        /*sceneLocationView
+         1. Get The Current Touch Location
+         2. Check That We Have Touched A Valid Node
+         3. Check If The Node Has A Name
+         4. Handle The Touch
+         */
+        
+        guard let touchLocation = touches.first?.location(in: sceneLocationView),
+            let hitNode = sceneLocationView.hitTest(touchLocation, options: nil).first?.node,
+            let nodeName = hitNode.name
+            else
+            {
+                //No Node Has Been Tapped
+                return
+            }
+        //Handle Event Here e.g. PerformSegue
+        print(nodeName)
+        if let url = URL(string: "https://www.sberbank.ru/ru/person")
+        {
+            UIApplication.shared.open(url, options: [:])
+        }
+ 
+        /*
         super.touchesBegan(touches, with: event)
 
         guard
@@ -254,6 +279,7 @@ class ViewController: UIViewController {
 
         if mapView == touchView || mapView.recursiveSubviews().contains(touchView) {
             centerMapOnUserLocation = false
+            print("First")
         } else {
             let location = touch.location(in: self.view)
 
@@ -264,12 +290,14 @@ class ViewController: UIViewController {
                 print("right side of the screen")
                 sceneLocationView.moveSceneHeadingClockwise()
             } else {
+                print("Create")
                 let image = UIImage(named: "pin")!
                 let annotationNode = LocationAnnotationNode(location: nil, image: image)
                 annotationNode.scaleRelativeToDistance = true
                 sceneLocationView.addLocationNodeForCurrentPosition(locationNode: annotationNode)
             }
         }
+        */
     }
 }
 
@@ -357,18 +385,7 @@ private extension ViewController {
             nodes.append(target)
         }
  
-        //55.744073, 37.765630
- 
-        //let first = buildNode(latitude: 55.744073, longitude: 37.765630, altitude: 165, imageName: "pin2")
-        //first.scaleRelativeToDistance = true
-        //nodes.append(first)
-        
-        //let first = buildNode(latitude: 54.782635, longitude: 32.045251, altitude: 165, imageName: "poliklinika")
-        //nodes.append(first)
-        
-        //let second = buildNode(latitude: 56.041705, longitude: 35.963046, altitude: 165, imageName: "poliklinika")
-        //nodes.append(second)
-        //56.041705, 35.963046
+
  
         // TODO: add a few more demo points of interest.
         // TODO: use more varied imagery.
@@ -431,6 +448,11 @@ private extension ViewController {
         let location = CLLocation(coordinate: coordinate, altitude: altitude)
         var image = UIImage(named: "pin3")!
         
+        //let singleTap = UITapGestureRecognizer(target: self, action: Selector("tapDetected"))
+        //image.isUserInteractionEnabled = true
+        //image.addGestureRecognizer(funcName)
+        
+        
         //if let urlImage = NSURL(string: imageName)
         //{
         //    if let data = NSData(contentsOf: urlImage as URL)
@@ -448,8 +470,11 @@ private extension ViewController {
         let pos = sceneLocationView.currentLocation()
         let corLat: Double = (pos?.coordinate.latitude)!
         let corLon: Double = (pos?.coordinate.longitude)!
+        
         let positionLat: String = String(format:"%f", corLat)
+        
         let positionLon: String = String(format:"%f", corLon)
+        
         let finally:String = "Position - " + positionLat + " x " + positionLon
         
         let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius="+radius+"&aggregate_by=with_photo"
@@ -466,7 +491,11 @@ private extension ViewController {
             {
                 let flatsW = try JSONDecoder().decode(FirstLevel.self, from: data)
                 self.itemsGlobal = (flatsW.result?.items)!
-                self.buildDemoData().forEach { self.sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0) }
+                self.sceneLocationView.removeAllNodes()
+                self.buildDemoData().forEach
+                    {
+                        self.sceneLocationView.addLocationNodeWithConfirmedLocation(locationNode: $0)
+                    }
             }
             catch let error
             {
