@@ -262,7 +262,8 @@ class ViewController: UIViewController {
             }
         //Handle Event Here e.g. PerformSegue
         print(nodeName)
-        if let url = URL(string: "https://www.sberbank.ru/ru/person")
+        //https://domclick.ru/card/sale__house__5507881
+        if let url = URL(string: "https://domclick.ru/card/sale__flat__"+nodeName)
         {
             UIApplication.shared.open(url, options: [:])
         }
@@ -371,79 +372,26 @@ private extension ViewController {
         
         print("Json Count - ",itemsGlobal.count)
         
-        
         for i in 0..<itemsGlobal.count
         {
             //print("lat - ",itemsGlobal[i]?.location?.lat!," lon - ",itemsGlobal[i]?.location?.lon!)
             let latitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lat)!
             let longitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lon)!
+            let flatId: Int = (itemsGlobal[i]?.id)!
             let imageNameFromWeb: String = (itemsGlobal[i]?.photo[0])!
             let imageNameConst: String = "https://img09.domclick.ru/s1280x-q80"
             let imageNameLocal:String = imageNameConst+imageNameFromWeb
-            let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal)
+            let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal, id: flatId)
             target.scaleRelativeToDistance = true
             nodes.append(target)
         }
- 
-
- 
-        // TODO: add a few more demo points of interest.
-        // TODO: use more varied imagery.
-        
-        /*
-        let bc = buildNode(latitude: 55.739118, longitude: 37.539473, altitude: 165, imageName: "bc")
-        nodes.append(bc)
-        
-        let ostnkino = buildNode(latitude: 55.741287, longitude: 37.540156, altitude: 165, imageName: "ostankino")
-        nodes.append(ostnkino)
-        
-        let zdravo = buildNode(latitude: 55.738191, longitude: 37.528981, altitude: 165, imageName: "zdravo")
-        nodes.append(zdravo)
-        
-        let rosbank = buildNode(latitude: 55.736812, longitude: 37.531693, altitude: 165, imageName: "rosbank")
-        nodes.append(rosbank)
-        
-        let poliklinika = buildNode(latitude: 55.740639, longitude: 37.538269, altitude: 165, imageName: "poliklinika")
-        nodes.append(poliklinika)
-        
-        let kofe = buildNode(latitude: 55.738688, longitude: 37.531029, altitude: 165, imageName: "kofe")
-        nodes.append(kofe)
-        
-        let photo = buildNode(latitude: 55.739823, longitude: 37.538512, altitude: 165, imageName: "photo")
-        nodes.append(photo)
-        
-        let pochta = buildNode(latitude: 55.736382, longitude: 37.530211, altitude: 165, imageName: "pochta")
-        nodes.append(pochta)
-        
-        let magefon = buildNode(latitude: 55.738688, longitude: 37.531029, altitude: 165, imageName: "megafon")
-        nodes.append(magefon)
-        
-        let bc2 = buildNode(latitude: 55.741287, longitude: 37.536868, altitude: 165, imageName: "bc")
-        nodes.append(bc2)
-        
-        let ostnkino2 = buildNode(latitude: 55.741287, longitude: 37.536868, altitude: 165, imageName: "ostankino")
-        nodes.append(ostnkino2)
-        */
-        
-        /*
-        for i in 0..<nodes.count
-        {
-            print(nodes[i].location)
-        }
-         */
-        /*
-        for i in 0..<nodes.count
-        {
-            nodes[i].scaleRelativeToDistance = true
-        }
-        */
         
         print("Nods Count - ",nodes.count)
         
         return nodes
     }
 
-    func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String) -> LocationAnnotationNode {
+    func buildNode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, altitude: CLLocationDistance, imageName: String, id: Int) -> LocationAnnotationNode {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let location = CLLocation(coordinate: coordinate, altitude: altitude)
         var image = UIImage(named: "pin3")!
@@ -451,7 +399,6 @@ private extension ViewController {
         //let singleTap = UITapGestureRecognizer(target: self, action: Selector("tapDetected"))
         //image.isUserInteractionEnabled = true
         //image.addGestureRecognizer(funcName)
-        
         
         //if let urlImage = NSURL(string: imageName)
         //{
@@ -461,8 +408,11 @@ private extension ViewController {
         //       image = image.resizedImage(newSize: CGSize(width: 100, height: 100))
         //   }
         //}
+        //let Lan = LocationAnnotationNode(location: location, image: image)
+        let flatID:String = String(id)
+        let Lan = LocationAnnotationNode(location: location, image: image, flatID: flatID)
         
-        return LocationAnnotationNode(location: location, image: image)
+        return Lan
     }
     
     func StartLoad(radius: String)
@@ -470,20 +420,13 @@ private extension ViewController {
         let pos = sceneLocationView.currentLocation()
         let corLat: Double = (pos?.coordinate.latitude)!
         let corLon: Double = (pos?.coordinate.longitude)!
-        
         let positionLat: String = String(format:"%f", corLat)
-        
         let positionLon: String = String(format:"%f", corLon)
-        
         let finally:String = "Position - " + positionLat + " x " + positionLon
-        
         let urlString: String = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location="+positionLat+","+positionLon+"&nearby_radius="+radius+"&aggregate_by=with_photo"
         //let urlString = "https://offers-service.domclick.ru/api/v1/offers/?counts=false&nearby_location=55.7436,37.7671&nearby_radius="+radius+"&aggregate_by=with_photo"
-        
         print("URL - "+urlString)
-        
         guard let url = URL(string: urlString) else {return}
-        
         URLSession.shared.dataTask(with: url) { (data, respone, error) in
             guard let data = data else {return}
             guard error == nil else {return}

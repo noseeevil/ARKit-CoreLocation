@@ -70,7 +70,8 @@ open class LocationAnnotationNode: LocationNode {
     ///Scaling relative to distance may be useful with local navigation-based uses
     ///For landmarks in the distance, the default is correct
     public var scaleRelativeToDistance = false
-
+    
+    /*
     public init(location: CLLocation?, image: UIImage) {
         self.image = image
         let plane = SCNPlane(width: image.size.width / 100, height: image.size.height / 100)
@@ -79,9 +80,7 @@ open class LocationAnnotationNode: LocationNode {
 
         annotationNode = SCNNode()
         annotationNode.geometry = plane
-        annotationNode.name = "SomeName"
         
-        //annotationNode.name = location?.distance(from: <#T##CLLocation#>)
         
         super.init(location: location)
 
@@ -91,7 +90,29 @@ open class LocationAnnotationNode: LocationNode {
 
         addChildNode(annotationNode)
     }
-
+    */
+ 
+    public init(location: CLLocation?, image: UIImage, flatID: String)
+    {
+        self.image = image
+        let plane = SCNPlane(width: image.size.width / 100, height: image.size.height / 100)
+        plane.firstMaterial!.diffuse.contents = image
+        plane.firstMaterial!.lightingModel = .constant
+        
+        annotationNode = SCNNode()
+        annotationNode.geometry = plane
+        annotationNode.name = flatID
+        
+        super.init(location: location)
+        //print("ID -"+flatID)
+        
+        let billboardConstraint = SCNBillboardConstraint()
+        billboardConstraint.freeAxes = SCNBillboardAxis.Y
+        constraints = [billboardConstraint]
+        
+        addChildNode(annotationNode)
+    }
+    
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
