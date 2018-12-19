@@ -452,7 +452,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
 
             if annotationNode.scaleRelativeToDistance {
                 scale = appliedScale.y
-                var koef: Float = 1
+                var koef: Float = 10
                 var NewScale = SCNVector3(x: appliedScale.x * koef, y: appliedScale.y * koef, z: appliedScale.z * koef)
                 annotationNode.annotationNode.scale = NewScale
             } else {

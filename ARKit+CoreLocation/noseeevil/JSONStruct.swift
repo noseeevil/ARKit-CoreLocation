@@ -27,7 +27,7 @@ struct ItemStruct: Codable
     var floors: Int?
     var price: Float64?
     var location: LocationStruct?
-    var photo: [String?]
+    //var photo: [String?]
 }
 
 struct LocationStruct: Codable

@@ -39,6 +39,8 @@ class ViewController: UIViewController {
 
     var positionLabel = UILabel()
     
+    var countFlats = UILabel()
+    
     var radiusInput = UISearchBar()
     
     var globalPositionLat: Double?
@@ -51,6 +53,7 @@ class ViewController: UIViewController {
     
     var itemsGlobal: [ItemStruct?] = []
     
+    var flatsCount: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,6 +69,12 @@ class ViewController: UIViewController {
         positionLabel.textColor = UIColor.white
         positionLabel.numberOfLines = 0
         sceneLocationView.addSubview(positionLabel)
+        
+        countFlats.font = UIFont.systemFont(ofSize: 10)
+        countFlats.textAlignment = .left
+        countFlats.textColor = UIColor.white
+        countFlats.numberOfLines = 0
+        sceneLocationView.addSubview(countFlats)
         
         radiusInput.delegate = self
         sceneLocationView.addSubview(radiusInput)
@@ -140,6 +149,8 @@ class ViewController: UIViewController {
         infoLabel.frame = CGRect(x: 6, y: 0, width: self.view.frame.size.width - 12, height: 14 * 4)
         
         positionLabel.frame = CGRect(x:6, y: 10, width: self.view.frame.size.width - 12, height: 14 * 4)
+        
+        countFlats.frame = CGRect(x:6, y: 90, width: self.view.frame.size.width - 12, height: 14 * 4)
         
         radiusInput.frame = CGRect(x:6, y: 50, width: self.view.frame.size.width - 12, height: 14 * 4)
         
@@ -216,8 +227,10 @@ class ViewController: UIViewController {
             let positionLat: String = String(format:"%f", corLat)
             let positionLon: String = String(format:"%f", corLon)
             let finally:String = "Position - " + positionLat + " x " + positionLon
+            let count:String = String(flatsCount)
             
             positionLabel.text = finally
+            countFlats.text = "Count - "+count
         }
         
         if let position = sceneLocationView.currentScenePosition() {
@@ -378,7 +391,8 @@ private extension ViewController {
             let latitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lat)!
             let longitudeLocal: CLLocationDegrees = (itemsGlobal[i]?.location?.lon)!
             let flatId: Int = (itemsGlobal[i]?.id)!
-            let imageNameFromWeb: String = (itemsGlobal[i]?.photo[0])!
+            //let imageNameFromWeb: String = (itemsGlobal[i]?.photo[0])!
+            let imageNameFromWeb: String = ""
             let imageNameConst: String = "https://img09.domclick.ru/s1280x-q80"
             let imageNameLocal:String = imageNameConst+imageNameFromWeb
             let target = buildNode(latitude: latitudeLocal, longitude: longitudeLocal, altitude: 165, imageName: imageNameLocal, id: flatId)
@@ -386,7 +400,9 @@ private extension ViewController {
             nodes.append(target)
         }
         
-        print("Nods Count - ",nodes.count)
+        flatsCount = nodes.count
+        
+        print("Nods Count - ",flatsCount)
         
         return nodes
     }
